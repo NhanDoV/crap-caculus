@@ -24,9 +24,9 @@ def derivative_view(fx, x, n_deg, ax):
     """
     order = 1 + 2*n_deg
     dif_f = [round(derivative(fx, x0=t, n=n_deg, dx=5e-2, order=order), 8) for t in x]
-    ax.plot(x, fx(x), label = 'True_f')
-    ax.grid(color='r', linestyle='--', linewidth=1)
-    ax.plot(x, dif_f, label = 'deriv(f, deg={})'.format(n_deg) )
+    ax.plot(x, fx(x), label = 'True_f', linewidth = 2)
+    ax.grid(color = 'violet', linestyle='--', linewidth = 1)
+    ax.plot(x, dif_f, label = 'deriv(f, deg={})'.format(n_deg), linewidth = 2)
     ax.set_xlabel("x")
     ax.set_ylabel("f and its derivative")
     ax.set_title("degree = {}".format(n_deg) )
@@ -124,7 +124,7 @@ def taylor_approx_view(x_range, fx, n_deg, ax):
     ax.plot(x_range, y2, label = 'Taylor_(f, deg={})'.format(n_deg), color = 'darkblue', linewidth = 2)
     ax.legend()
     
-# /=================================================================================================\    
+# /=================================================================================================\
 def taylor_loss_view(x_range, fx, min_deg, max_deg):
     """
     
@@ -163,3 +163,71 @@ def taylor_loss_view(x_range, fx, min_deg, max_deg):
     
     ax1.grid(color='violet', linestyle='--', linewidth=1)
     ax2.grid(color='violet', linestyle='--', linewidth=1)
+
+# /=================================================================================================\
+def sequence_n_epsilon(n_min, n_max, n_steps, your_seq, seq_limit = 0, img_loc = 'center right'):
+    """
+    
+    """
+    eps = []
+    
+    for n in range(n_min, n_max + n_steps // 2, n_steps):
+        
+        err = abs(your_seq(n) - seq_limit)
+        eps.append(err)
+        
+    fig, ax1 = plt.subplots(1, 1, figsize = (20, 6), dpi = 90)
+    color = 'tab:red'
+    ax1.set_xlabel('number of n')
+    ax1.set_ylabel('epsilon = |x_n - $\overline{x}$|', color=color)
+    y = eps
+    x = range(n_min, n_max + n_steps // 2, n_steps)
+    ax1.plot(x, y, 'o-', color=color)
+    ax1.tick_params(axis='y', labelcolor=color)
+    ax1.set_title("your input series and the convergence_result")
+    
+    ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
+    color = 'tab:green'
+    ax2.set_ylabel("relative_error", color=color)  # we already handled the x-label with ax1
+    z = [your_seq(n) for n in x]
+    zs = [seq_limit for n in x]
+    ax2.plot(x, z, color=color, label = '$x_n$ values')
+    ax2.plot(x, zs, color='black', label = 'sequence_limit')
+    ax2.legend(loc = img_loc)
+    ax2.tick_params(axis='y', labelcolor=color)    
+    ax1.grid(color='violet', linestyle='--', linewidth=1)
+    ax2.grid(color='violet', linestyle='--', linewidth=1)
+
+# /=================================================================================================\
+def series_n_epsilon(n_min, n_max, n_steps, your_series, series_limit = 0, img_loc = 'center right'):
+    
+    eps = []
+    
+    for n in range(n_min, n_max + n_steps // 2, n_steps):
+        
+        err = abs(your_series(n) - series_limit)
+        eps.append(err)
+        
+    fig, ax1 = plt.subplots(1, 1, figsize = (20, 6), dpi = 90)
+    color = 'tab:red'
+    ax1.set_xlabel('number of n')
+    ax1.set_ylabel('epsilon = |x_n - $\overline{x}$|', color=color)
+    y = eps
+    x = range(n_min, n_max + n_steps // 2, n_steps)
+    ax1.plot(x, y, 'o-', color=color)
+    ax1.tick_params(axis='y', labelcolor=color)
+    ax1.set_title("your input series and the convergence_result")
+    
+    ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
+    color = 'tab:green'
+    ax2.set_ylabel("relative_error", color=color)  # we already handled the x-label with ax1
+    z = [your_series(n) for n in x]
+    zs = [series_limit for n in x]
+    ax2.plot(x, z, color=color, label = '$x_n$ values')
+    ax2.plot(x, zs, color='black', label = 'series_limit')
+    ax2.legend(loc = img_loc)
+    ax2.tick_params(axis='y', labelcolor=color)    
+    ax1.grid(color='violet', linestyle='--', linewidth=1)
+    ax2.grid(color='violet', linestyle='--', linewidth=1)
+
+# /=================================================================================================\
