@@ -1,3 +1,15 @@
+"""
+    This package is used to generate the values of the
+    
+      1) derivative of function
+      2) Taylor series
+      3) Fourier series
+      4) Legendre approximation
+      5) Larange approximation
+      6) Series converenge viewing
+      7) Limit of a given sequence
+"""
+
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
