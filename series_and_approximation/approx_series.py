@@ -231,3 +231,30 @@ def series_n_epsilon(n_min, n_max, n_steps, your_series, series_limit = 0, img_l
     ax2.grid(color='violet', linestyle='--', linewidth=1)
 
 # /=================================================================================================\
+def sigmoid(x): return 1 / (1 + np.exp(-x))
+
+# /=================================================================================================\
+def n_layers_fx(fx, x, n):
+    
+    y = fx(x)
+    if n == 1:
+        return fx(x)
+    else:
+        for k in range(n):
+            y = fx(y)
+    return y
+
+# /=================================================================================================\
+def depth_view_actv_func(fx, x, n_list, func_name):
+    
+    fig, ax = plt.subplots(1, 1, figsize = (20, 8), dpi = 100)
+    for n in n_list:
+        y = [n_layers_fx(fx, t, n = n) for t in x]
+        ax.plot(x, y, label = 'n_layers={}'.format(n), linewidth = 2)
+        ax.grid(color = 'cyan', linestyle='--', linewidth = 1)
+
+    plt.title("$f_1(x) =$ {}".format(func_name) +"$(x)$\n $f_2(x) = f_1(f_1(x))$\n ...\n $f_n(x) = f_1(f_{n-1}(x))$\n where n is the number of layers")
+    plt.xlabel("x")
+    plt.ylabel("f(x)")
+    plt.legend()
+    plt.show()
