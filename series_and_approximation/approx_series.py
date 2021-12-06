@@ -258,3 +258,113 @@ def depth_view_actv_func(fx, x, n_list, func_name):
     plt.ylabel("f(x)")
     plt.legend()
     plt.show()
+    
+# /=================================================================================================\    
+def integral_approx(fx, a, b, n):
+    r = (b-a)/100
+    x_ab = np.linspace(a, b, 201)
+    x_t = np.linspace(a-r, b+r, 201)
+
+    h = 1/(np.sqrt(n))
+    u = np.linspace(a, b, n+1)
+    u_s = u[1:]
+    
+    s = 0
+    for k in range(len(u)-1):
+        width = u[k+1] - u[k]
+        height = (fx(u[k]) + fx(u[k+1]))/2
+        s += width * height
+    
+    return s
+
+# /=================================================================================================\
+def loss_integral_Riemann_sum(fx, a, b, min_n, max_n, f_name):
+    
+    from scipy.integrate import quad   
+    sn = []
+    sx = range(min_n, max_n + 1)    
+    sn = [integral_approx(fx, a, b, n) for n in sx]
+    
+     ## check odd or even function
+    x_c = np.linspace(0, 10, 100) 
+    if (fx(x_c) == fx(-x_c)).all(): 
+        s0 = np.round(quad(fx, a, b)[0], 15)
+    elif (fx(x_c) == -fx(-x_c)).all():
+        s0 = 0
+    else:
+        s0 = np.round(quad(fx, a, b)[0], 12)
+    
+    plt.figure(figsize=(20, 3.5), dpi=90)
+    plt.plot(sx, sn, 'o-', label = 'S(f, a, b, n)_approx')
+    plt.plot([min_n, max_n], [s0, s0], '-', label = 'true_integral')
+    plt.grid(color='violet', linestyle='--', linewidth=1)
+    plt.xlabel("n_partitions")
+    plt.title(f_name)
+    plt.legend()
+    
+# /=================================================================================================\
+def rect_kernel(t):
+    return 0.5 * (abs(t) <= 1)
+
+def integral_plot(fx, a, b, n, ax, S_clr = "lightsalmon", S_apr_clr = "#C79FEF"):
+    r = (b-a)/100
+    x_ab = np.linspace(a, b, 201)
+    x_t = np.linspace(a-r, b+r, 201)
+
+    h = 1/(np.sqrt(n))
+    u = np.linspace(a, b, n+1)
+    u_s = u[1:]
+    
+    s = 0
+    for k in range(len(u)-1):
+        ck = (fx(u[k]) + fx(u[k+1]))/2
+        ax.fill_between([u[k], u[k+1]], [ck, ck], [fx(u[k]), fx(u[k+1])],
+                         facecolor = S_clr, interpolate=True)
+        ax.fill_between([u[k], u[k+1]], 
+                      0,
+                      [ck, ck],
+                     facecolor = S_apr_clr, step = 'pre', edgecolor='b'
+                    )
+    ax.plot([a, b], [0, 0], color = 'green', linewidth = 2.5, label = '$S_n(f,a,b)$_approx')
+    ax.plot(x_t, fx(x_t), '--', color = 'darkgreen', linewidth = 0.5, label = 'f(x)')
+    ax.plot(x_ab, fx(x_ab), color = 'green', linewidth = 3)
+    ax.plot([b, b], [0, fx(b)], color = 'green', linewidth = 3)
+    ax.plot([a, a], [0, fx(a)], color = 'green', linewidth = 3)
+    ax.grid(color='cyan', linestyle='--', linewidth=0.5)
+    ax.set_title("n={}".format(n))
+    ax.legend()
+    
+# /=================================================================================================\   
+def koch_snowflake(order, scale=10):
+    """
+    Return two lists x, y of point coordinates of the Koch snowflake.
+
+    Parameters
+    ----------
+    order : int
+        The recursion depth.
+    scale : float
+        The extent of the snowflake (edge length of the base triangle).
+    """
+    def _koch_snowflake_complex(order):
+        if order == 0:
+            # initial triangle
+            angles = np.array([0, 120, 240]) + 90
+            return scale / np.sqrt(3) * np.exp(np.deg2rad(angles) * 1j)
+        else:
+            ZR = 0.5 - 0.5j * np.sqrt(3) / 3
+
+            p1 = _koch_snowflake_complex(order - 1)  # start points
+            p2 = np.roll(p1, shift=-1)  # end points
+            dp = p2 - p1  # connection vectors
+
+            new_points = np.empty(len(p1) * 4, dtype=np.complex128)
+            new_points[::4] = p1
+            new_points[1::4] = p1 + dp / 3
+            new_points[2::4] = p1 + dp * ZR
+            new_points[3::4] = p1 + dp / 3 * 2
+            return new_points
+
+    points = _koch_snowflake_complex(order)
+    x, y = points.real, points.imag
+    return x, y
