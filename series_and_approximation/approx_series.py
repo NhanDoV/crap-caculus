@@ -368,3 +368,31 @@ def koch_snowflake(order, scale=10):
     points = _koch_snowflake_complex(order)
     x, y = points.real, points.imag
     return x, y
+
+# /=================================================================================================\   
+def Legendre_poly(n, x): 
+    """
+    
+    """
+    if(n == 0):
+        return 1 # P0 = 1
+    elif(n == 1):
+        return x # P1 = x
+    else:
+        return (((2 * n)-1)*x * Legendre_poly(n-1, x)-(n-1) * Legendre_poly(n-2, x))/float(n)
+    
+    
+# /=================================================================================================\   
+def approx_integral_gauss_legendre(fx, a, b, N_f):
+    """
+           This function is used to approximate the Gauss-Legendre integration on (a, b) of f(x) with
+        respect to the `N_f` (number of sample points and weights)
+            Input params
+                fx (function) : function to compute / approximate integral
+                a, b (float) : the input-interval
+                N_f (int): number of sample points and weights, and must be greater than 1.
+    """
+    u, w_gauss = np.polynomial.legendre.leggauss(N_f)
+    t = 0.5*(u + 1)*(b - a) + a
+
+    return sum(w_gauss * fx(t)) * 0.5*(b - a)
