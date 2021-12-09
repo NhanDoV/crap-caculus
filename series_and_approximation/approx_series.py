@@ -13,6 +13,7 @@
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
+from scipy.integrate import quad
 from scipy.misc import derivative
 from scipy.interpolate import approximate_taylor_polynomial
 sns.set_theme(style = "darkgrid", 
@@ -380,8 +381,7 @@ def Legendre_poly(n, x):
         return x # P1 = x
     else:
         return (((2 * n)-1)*x * Legendre_poly(n-1, x)-(n-1) * Legendre_poly(n-2, x))/float(n)
-    
-    
+        
 # /=================================================================================================\   
 def approx_integral_gauss_legendre(fx, a, b, N_f):
     """
@@ -396,3 +396,63 @@ def approx_integral_gauss_legendre(fx, a, b, N_f):
     t = 0.5*(u + 1)*(b - a) + a
 
     return sum(w_gauss * fx(t)) * 0.5*(b - a)
+
+# /=================================================================================================\   
+def gauss_legendre_view_loss(fx, a, b, nb_pts_min, nb_pts_max):
+    """
+    
+    """
+    gauss_pts = range(nb_pts_min, nb_pts_max + 1)
+    true_value = np.round(quad(fx, a, b)[0], 15) 
+
+    def mape(y_pred, y_true):
+
+        if y_true == 0:
+            if y_pred == 0:
+                res = 0
+            else:
+                res = y_pred*10e10
+        else:
+            res = abs(y_pred - y_true) / abs(y_true)
+
+        return res
+
+    losses = []
+    errors = []
+    approx_values = []
+    relative_err = []
+
+    for n_points in gauss_pts:
+
+        aprx_value = approx_integral_gauss_legendre(fx, a, b, N_f = n_points)
+        err = true_value - aprx_value
+        rel = mape(true_value, aprx_value)
+
+        approx_values.append(aprx_value)
+        losses.append(err)
+        errors.append(err**2 / n_points)
+        relative_err.append(rel / n_points)
+
+    fig, ax = plt.subplots(2, 1, figsize=(20, 12), dpi = 100)
+    ax[0].plot(gauss_pts, approx_values, 's-', color='red', label = 'Gauss-Legendre approx(n_points)', linewidth=4)
+    ax[0].plot(gauss_pts, [true_value for _ in gauss_pts], '-', color='green', label = 'true_value', linewidth=2)
+    ax[0].set_xlim([nb_pts_min-0.75, nb_pts_max+0.75])
+    ax[0].set_xlabel("n_points (number of Gaussian-points)")
+    ax[0].grid(color='cyan', linestyle='--', linewidth=0.5)
+    ax[0].legend()
+
+    axes = ax[1]
+    color = 'tab:red'
+    axes.set_xlabel('number of truncated_degrees')
+    axes.set_ylabel('MSE', color=color)
+    axes.plot(gauss_pts, relative_err, 'o-', color='red', label='relative_errors', linewidth = 3)
+    axes.tick_params(axis='y', labelcolor=color)
+    axes.set_title("MSE & relative_error of Fourier_approximation w.r.t degree of truncated")
+    axes.grid(color='violet', linestyle='-.', linewidth=1)
+
+    axes2 = axes.twinx()  # instantiate a second axes that shares the same x-axis
+    color = 'tab:green'
+    axes2.set_ylabel("relative_error", color=color)  # we already handled the x-label with ax1
+    axes2.plot(gauss_pts, errors, 'o-', color='lightgreen', label='mse', linewidth = 2)
+    axes2.tick_params(axis='y', labelcolor=color)
+    axes2.grid(color='violet', linestyle='-.', linewidth=0.5)
